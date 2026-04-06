@@ -24,31 +24,44 @@ Running `cargo bench` with [Criterion](https://github.com/bheisler/criterion.rs)
 
 ## Quick Start
 
-**Clone the repository:**
+### One-line install (recommended)
+
 ```bash
-git clone https://github.com/yourusername/ohmycriterion.git
-cd ohmycriterion
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/pdroalves/OhMyCriterion/main/tools/install.sh)"
+```
+
+Or with wget:
+
+```bash
+sh -c "$(wget -qO- https://raw.githubusercontent.com/pdroalves/OhMyCriterion/main/tools/install.sh)"
+```
+
+This installs to `~/.ohmycriterion/` and creates an `omc` alias in your shell.
+
+### Manual install
+
+```bash
+git clone https://github.com/pdroalves/OhMyCriterion.git
+cd OhMyCriterion
 chmod +x ohmycriterion.sh
-```
-
-**Run from your Rust project root:**
-```bash
-/path/to/ohmycriterion.sh
-```
-
-**Specify a custom Criterion results path:**
-```bash
-/path/to/ohmycriterion.sh /path/to/criterion/results
-```
-
-**Tip: Create a shell alias for quick access:**
-```bash
 alias omc='/path/to/ohmycriterion.sh'
+```
 
-# Now use it anywhere:
-omc
-omc --no-color
-omc --json
+### Usage
+
+Run from any Rust project with Criterion benchmarks:
+
+```bash
+omc                    # auto-discovers target/criterion
+omc --no-color         # disable colors (useful for CI)
+omc --json             # export as JSON
+omc /custom/path       # specify custom criterion path
+```
+
+### Uninstall
+
+```bash
+~/.ohmycriterion/tools/uninstall.sh
 ```
 
 ## Usage
@@ -107,7 +120,7 @@ Most modern Linux and macOS systems have these pre-installed.
  | |__| | | | | |  | | |_| | |___| |  | | ||  __/ |  | | (_) | | | |
   \____/|_| |_|_|  |_|\__, |\____|_|  |_|\__\___|_|  |_|\___/|_| |_|
                         |___/
-  Criterion Benchmark Results — v1.0.0
+  Criterion Benchmark Results — v0.1
 
 +----------------------------+-------+------------+------------------+--------------+-------------------------------+
 | Benchmark                  | GPU   | Type       | Value            | Change       | 95% CI                        |

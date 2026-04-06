@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-#  OhMyCriterion v1.0.0
+#  OhMyCriterion v0.1
 #  A polished Criterion benchmark results parser for Rust projects.
 #
 #  Reads Criterion output from target/criterion, auto-discovers workspace
@@ -16,7 +16,7 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 # Version
 # ---------------------------------------------------------------------------
-readonly VERSION="1.0.0"
+readonly VERSION="0.1"
 readonly SCRIPT_NAME="OhMyCriterion"
 
 # Record field separator — must not appear in benchmark names or formatted values
