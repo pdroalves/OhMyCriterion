@@ -30,16 +30,16 @@ setup_colors() {
         C_RESET=""; C_BOLD=""; C_DIM=""
         C_RED=""; C_GREEN=""; C_YELLOW=""; C_BLUE=""; C_MAGENTA=""; C_CYAN=""; C_WHITE=""
     else
-        C_RESET="\033[0m"
-        C_BOLD="\033[1m"
-        C_DIM="\033[2m"
-        C_RED="\033[0;31m"
-        C_GREEN="\033[0;32m"
-        C_YELLOW="\033[1;33m"
-        C_BLUE="\033[0;34m"
-        C_MAGENTA="\033[0;35m"
-        C_CYAN="\033[0;36m"
-        C_WHITE="\033[0;37m"
+        C_RESET=$'\033[0m'
+        C_BOLD=$'\033[1m'
+        C_DIM=$'\033[2m'
+        C_RED=$'\033[0;31m'
+        C_GREEN=$'\033[0;32m'
+        C_YELLOW=$'\033[1;33m'
+        C_BLUE=$'\033[0;34m'
+        C_MAGENTA=$'\033[0;35m'
+        C_CYAN=$'\033[0;36m'
+        C_WHITE=$'\033[0;37m'
     fi
 }
 
@@ -478,6 +478,19 @@ pad_to_width() {
 }
 
 # ---------------------------------------------------------------------------
+# Truncate a string to a max visible width, appending "…" if trimmed
+# ---------------------------------------------------------------------------
+truncate_to() {
+    local str="$1"
+    local width="$2"
+    if (( ${#str} > width )); then
+        printf '%s' "${str:0:$((width - 1))}…"
+    else
+        printf '%s' "$str"
+    fi
+}
+
+# ---------------------------------------------------------------------------
 # Unicode box-drawing table renderer
 # ---------------------------------------------------------------------------
 display_results_table() {
@@ -485,6 +498,13 @@ display_results_table() {
         echo -e "${C_YELLOW}No benchmark results found.${C_RESET}"
         return
     fi
+
+    # --- Terminal width ---
+    local term_width=0
+    if [[ -t 1 ]]; then
+        term_width=$(tput cols 2>/dev/null || echo 0)
+    fi
+    [[ "$term_width" -lt 40 ]] && term_width=0   # 0 = no cap
 
     # --- Dynamic column widths ---
     local max_name=9      # "Benchmark" header minimum
@@ -501,6 +521,15 @@ display_results_table() {
     local col_type=10
     local col_val=16
     local col_change=12
+
+    # --- Cap name column to fit terminal ---
+    if [[ "$term_width" -gt 0 ]]; then
+        local fixed_cols=$(( col_gpu + col_type + col_val + col_change + max_ci ))
+        local overhead=$(( fixed_cols + 7 + 14 ))   # 7 pipes, 14 spaces (2 per col)
+        local name_budget=$(( term_width - overhead ))
+        (( name_budget < 20 )) && name_budget=20
+        (( max_name > name_budget )) && max_name=$name_budget
+    fi
 
     # --- Box-drawing row builders ---
     repeat_h() { printf '%*s' "$1" '' | tr ' ' '-'; }
@@ -580,8 +609,11 @@ display_results_table() {
         local change_cell
         change_cell=$(format_change_col "$REC_PCT" "$REC_DIR")
 
+        local display_name
+        display_name=$(truncate_to "$REC_FULL_ID" "$max_name")
+
         table_row \
-            "$REC_FULL_ID" \
+            "$display_name" \
             "$REC_GPU" \
             "${C_DIM}${REC_TYPE}${C_RESET}" \
             "$colored_val" \
@@ -621,12 +653,29 @@ display_summary() {
     echo -e "${C_BOLD}${C_CYAN}Summary${C_RESET}"
     echo -e "  Total benchmarks : ${C_BOLD}${total}${C_RESET}"
 
+    # Truncate summary names to fit terminal
+    local sum_width=0
+    if [[ -t 1 ]]; then
+        sum_width=$(tput cols 2>/dev/null || echo 0)
+    fi
+
     if [[ -n "$fastest_name" ]]; then
         local fmt; fmt=$(format_ns "$fastest_ns")
+        # "  Fastest (latency): " = 21 chars + value + "  " + name
+        if [[ "$sum_width" -gt 40 ]]; then
+            local avail=$(( sum_width - 21 - ${#fmt} - 2 ))
+            (( avail < 20 )) && avail=20
+            fastest_name=$(truncate_to "$fastest_name" "$avail")
+        fi
         echo -e "  Fastest (latency): ${C_GREEN}${fmt}${C_RESET}  ${C_DIM}${fastest_name}${C_RESET}"
     fi
     if [[ -n "$slowest_name" && "$slowest_name" != "$fastest_name" ]]; then
         local fmt; fmt=$(format_ns "$slowest_ns")
+        if [[ "$sum_width" -gt 40 ]]; then
+            local avail=$(( sum_width - 21 - ${#fmt} - 2 ))
+            (( avail < 20 )) && avail=20
+            slowest_name=$(truncate_to "$slowest_name" "$avail")
+        fi
         echo -e "  Slowest (latency): ${C_RED}${fmt}${C_RESET}  ${C_DIM}${slowest_name}${C_RESET}"
     fi
 
