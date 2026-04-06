@@ -62,6 +62,14 @@ omc --json             # export as JSON
 omc /custom/path       # specify custom criterion path
 ```
 
+### Update
+
+Re-run the installer to update to the latest version:
+
+```bash
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/pdroalves/OhMyCriterion/main/tools/install.sh)"
+```
+
 ### Uninstall
 
 ```bash
