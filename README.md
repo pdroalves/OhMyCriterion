@@ -8,6 +8,10 @@ Running `cargo bench` with [Criterion](https://github.com/bheisler/criterion.rs)
 
 **OhMyCriterion** parses your Criterion benchmark results and displays them in a beautifully formatted, color-coded table. See latency and throughput metrics instantly, spot regressions/improvements, and get the insights you need—right in your terminal.
 
+```bash
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/pdroalves/OhMyCriterion/main/tools/install.sh)"
+```
+
 ## Features
 
 - **Smart unit scaling** – Latency results automatically scale from nanoseconds to seconds
